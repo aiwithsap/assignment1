@@ -1,0 +1,19 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.tagline {
+  opacity: 0.8;
+}
