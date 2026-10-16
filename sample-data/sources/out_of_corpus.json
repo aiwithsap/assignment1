@@ -1,0 +1,25 @@
+{
+  "description": "Hand-written questions the corpus cannot answer: other countries, invented instruments, or matters outside Australian legislation. Alternating items go to dev and test.",
+  "questions": [
+    "What does section 21 of the UK Financial Services and Markets Act 2000 prohibit?",
+    "Under the Banking (Digital Asset Custody) Act 2031 (Cth), who must hold a custody licence?",
+    "What is the maximum penalty under New Zealand's Anti-Money Laundering and Countering Financing of Terrorism Act 2009?",
+    "Under the Australian Interplanetary Mining Act 2042, how are lunar mining royalties calculated?",
+    "What does the US Dodd-Frank Act require of systemically important banks?",
+    "Under the Queensland Artificial Sweetener Labelling Regulation 2029, what must a label display?",
+    "What notice period does Singapore's Employment Act give for dismissal?",
+    "Under the Tasmanian Quantum Computing Safety Act 2035, who is the regulator?",
+    "What are the capital requirements under Canada's Bank Act for foreign branches?",
+    "Under the Commonwealth Time Travel (Liability) Act 2050, who is liable for paradoxes?",
+    "What does the European Union's Digital Operational Resilience Act require of ICT providers?",
+    "Under the Western Australian Unicorn Protection Regulations 2033, what permits are required?",
+    "How does the Japanese Banking Act define a bank holding company?",
+    "Under the Norfolk Island Underwater Casino Act 2040, what licence fees apply?",
+    "What does Germany's Banking Act (KWG) say about large exposure limits?",
+    "Under the NSW Teleportation Licensing Act 2045, how long is a licence valid?",
+    "What is the role of the Monetary Authority of Singapore under its founding Act?",
+    "Under the Commonwealth Asteroid Defence Levy Act 2038, who must pay the levy?",
+    "What does South Africa's Financial Sector Regulation Act say about conduct standards?",
+    "Under the Queensland Weather Control Act 2036, who may authorise cloud seeding?"
+  ]
+}

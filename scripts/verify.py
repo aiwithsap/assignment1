@@ -84,7 +84,7 @@ def step_tests(_: argparse.Namespace) -> StepResult:
 
 
 def step_corpus(_: argparse.Namespace) -> StepResult:
-    return StepResult(Status.SKIPPED, "corpus not built yet (planned: commit 2)")
+    return _run(_python("legisqa", "verify-corpus"))
 
 
 def step_evaluation(_: argparse.Namespace) -> StepResult:

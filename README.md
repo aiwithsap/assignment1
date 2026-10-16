@@ -28,9 +28,22 @@ uv sync
 ```bash
 uv run legisqa --version
 uv run legisqa show-config
+uv run legisqa verify-corpus   # manifest hashes, overlay isolation, quarantine counts
 ```
 
 The `ask`, `serve` and `eval` commands arrive with their features.
+
+## Data
+
+`sample-data/` holds 426 passages of Commonwealth and state legislation (CC BY 4.0, see
+[`sample-data/ATTRIBUTION.md`](sample-data/ATTRIBUTION.md)), a dev/test question split, refusal
+cases, and a separate, labelled overlay of 28 attack passages used only in the `demo` and `eval`
+profiles. Everything needed to run and test is committed. Rebuilding from the raw export (not
+committed) is deterministic:
+
+```bash
+uv run python scripts/build_corpus.py --raw data/raw/qa.jsonl
+```
 
 ## Verify
 
