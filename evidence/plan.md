@@ -1,6 +1,6 @@
 # Build plan: grounded Q&A over Australian legislation, with verified citations, safe abstain and prompt-injection defences
 
-**Status:** plan only. Implementation has not started, and nothing has been committed or pushed.
+**Status:** this is the plan as approved before implementation (revision 4), kept unchanged as a record. What was actually built and measured, including deviations, is in `verify.md` and `criteria-ledger.md`.
 
 **Repository:** `github.com/aiwithsap/assignment1`, which is public. Local clone: `C:\projects\assignment1`.
 
