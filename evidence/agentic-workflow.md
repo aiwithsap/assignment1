@@ -6,7 +6,7 @@
 |---|---|
 | Coding agent (primary implementation) | **Claude (Opus 5.5)** in the Claude app, working directly in the repository through a shell on the candidate's computer. It wrote all code, tests, data builds and documents, and ran every check |
 | Adversarial plan reviewer | **ChatGPT Astra**, a model from a different provider, asked to attack the plan before implementation (`design-review-log.md`) |
-| Label audit (pending) | An independent AI model chosen by the candidate, using `review/audit-rubric.md` |
+| Label audit (after the build) | **OpenAI GPT-6 through Codex**, chosen by the candidate, using `review/audit-rubric.md`. Results in `verify.md`; recorded but not acted on for lack of time |
 | Checks the agent could not override | `ruff`, `mypy --strict`, `pytest` with a coverage floor, `tsc`, Vitest, the corpus manifest, the evaluation gates and the frozen-run fingerprint, all run through `scripts/verify.py` |
 
 ## How the work was decomposed
@@ -51,6 +51,7 @@ The agent kept these rules in its working plan and applied them in every step:
 | Evaluation on dev data | A keyword-stuffing detector that fired on 38% of genuine dev passages; a phone pattern that missed 1900 numbers; an untested output guard (led to the adaptive attacks) |
 | The frozen-run guard | The first final run used placeholder thresholds because a scripted edit had silently failed; disclosed in `verify.md`, and a guard now prevents it |
 | Independent adversarial review (ChatGPT Astra) | Citation integrity mislabelled as groundedness; test data used for selection; contract contradictions; schedule risks; publication boundaries |
+| Independent label audit (Codex, after the build) | The support proxy over-counts as well as under-counts (19 of 36 sampled excerpts labelled supported, 13 judged fully supporting) and one gold answer is wrong. Recorded, not acted on for lack of time |
 | Candidate approvals | Commits 1 and 2 reviewed at snapshot level |
 
 ## Ownership

@@ -20,7 +20,7 @@ not run, not applicable. Execution identity for all results: code fingerprint `4
 | 12 | Safe handling of errors and failure paths | One outcome contract: 422, 503, 500 envelopes; unready start; fail-closed audit | `tests/contract/`, `tests/integration/test_api.py` | Demonstrated | |
 | 13 | At least one guarded failure, rejection, degrade or abstain | 422 rejections, three abstain reasons, quarantine, unready 503 | AT1, AT3, AT4 | Demonstrated | |
 | 14 | Basic operational thinking | JSON logs, audit trail, security events, `/healthz`, `/readyz`, failure-mode table | `operate.md` | Demonstrated | |
-| 15 | Evidence of agent use and of verifying its output | Steering record, review mechanisms, adversarial review, disclosed failure | `agentic-workflow.md`, `design-review-log.md`, `verify.md` | Demonstrated | Label audit pending |
+| 15 | Evidence of agent use and of verifying its output | Steering record, review mechanisms, adversarial review, disclosed failure | `agentic-workflow.md`, `design-review-log.md`, `verify.md` | Demonstrated | Label audit completed after the build; findings recorded in `verify.md` but not acted on for lack of time |
 | 16 | Core path needs no paid keys, private or Westpac credentials, or assessor-specific setup | No keys exist; no network at runtime | Clean-checkout run with no `.env` | Demonstrated | |
 | 17 | Only synthetic, sample or public data | CC BY legislation subset; synthetic labelled overlay; raw file git-ignored | `sample-data/ATTRIBUTION.md`, `manifest.json`, hygiene check | Demonstrated | |
 | 18 | Backing services, sample data, mocks and stubs included or described | In-memory corpus committed; no services needed | README; `operate.md` | Demonstrated | |

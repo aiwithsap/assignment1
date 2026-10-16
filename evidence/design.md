@@ -66,7 +66,8 @@ evaluation measures exactly what serves requests.
   visible in the masked-name results. See D1.
 - **Extractive answers rather than generated prose.** Nothing generated can be steered by poisoned text,
   and every word shown is a verbatim quote. The cost is readability and answer completeness: only 51.2%
-  of test excerpts meet the strict support definition (D2).
+  of test excerpts meet the strict support definition (D2), and an independent label audit found full
+  support in 13 of 40 sampled items (`verify.md`; not acted on for lack of time).
 - **Provenance first, pattern detection second.** For documents with a trusted reference, a hash check
   catches any alteration regardless of wording. Pattern detectors are the backstop for content without a
   reference and are explicitly evadable (D3).

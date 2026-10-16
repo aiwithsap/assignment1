@@ -38,8 +38,9 @@ documentation only.
   if either changes, because re-running would re-use the test set.
 - **Acceptance targets** were fixed on 15 October 2026 before any measurement (`eval/acceptance.toml`).
 - **Support** is a strict, predeclared proxy: the excerpt cites the gold passage **and** contains at least
-  half of the gold answer's content words. The gold answers are GPT-4 paraphrases, so this under-counts
-  excerpts a person would accept. It is reported, not optimised.
+  half of the gold answer's content words. The gold answers are GPT-4 paraphrases, so it can miss excerpts a person
+  would accept; the independent label audit below shows it also over-counts incomplete excerpts (19 of 36
+  sampled excerpts labelled supported, against 13 judged fully supporting). It is reported, not optimised.
 - **Every rate** below names its population and denominator.
 
 ## Results
@@ -141,10 +142,86 @@ a dash belongs) remain because the passages are quoted verbatim.
 
 ## Independent label audit
 
-The sample (`evidence/review/audit-sample.jsonl`, 40 test items in a fixed hash order) and rubric
-(`evidence/review/audit-rubric.md`) are ready. **The audit has not been run yet**; when an independent AI
-model has labelled the sample, record the model, date, agreement with the automatic labels, and metrics with
-and without items it marks invalid.
+> **Status: recorded, not acted on.** The audit was completed after the build clock stopped. Its findings
+> were **not acted on because of lack of time**: the support proxy, the gold labels (including the one wrong
+> gold answer), the frozen results and the headline figures elsewhere in the evidence pack are unchanged.
+> They are reported here so the reviewer can weigh them against those figures.
+
+Completed on **16 October 2026 (Australia/Sydney)** by **OpenAI GPT-6 through Codex; no more specific
+model identifier exposed in this review runtime**. All 40 fixed-hash sample items were judged against
+`review/audit-rubric.md`; results are in [`review/audit-results.jsonl`](review/audit-results.jsonl),
+one JSON line per item with the required four fields. This was a post-build adversarial review, not
+work inside the original build timebox; no application code or frozen results were changed.
+
+### Method and deviations
+
+- Judgments use only the supplied source, question, gold answer and excerpt, with no outside knowledge.
+- The reviewing assistant performed all judgments without delegation. The first two automatic labels
+  were visible during intake; subsequent substantive review batches omitted automatic labels. All 40
+  judgments were saved before aggregate comparison. This was not fully blind or independently replicated.
+- `supports` means substantive full support; partial support requires relevant but incomplete evidence.
+  Matching the instrument name alone is insufficient. Binary agreement maps only `supports` to true,
+  maps `partly_supports` and `does_not_support` to false, and excludes `no_excerpt` rather than counting
+  null/null as agreement.
+- The rubric leaves `wrong` ambiguous between a question and its question/gold pair. It was used for
+  one clear material gold-answer error: `q_586be8bde6` assigns gilding to the R21 background, whereas the
+  source assigns it to the German shepherd and pup representation. The question itself is answerable.
+  Its exclusion below is a disclosed sensitivity analysis, not deletion from the dataset.
+- This is a single-model label audit, not a human legal review. Borderline completeness judgments and
+  imperfect gold answers need adjudication before treating these labels as authoritative.
+
+### Audit results
+
+Question validity: **35 answerable, 4 partly answerable, 1 wrong, 0 ambiguous without instrument name**.
+Excerpt support: **13 supports, 15 partly supports, 8 does not support, 4 no excerpt**.
+
+Full support: **13/40 (32.5%)** of the sample, or **13/36 (36.1%)** of returned excerpts.
+Automatic-label agreement under the binary policy above: **28/36 (77.8%)**, excluding four abstentions.
+There are 12 automatic true/full-support agreements, 16 automatic false/not-full-support agreements,
+seven automatic true/partial-support disagreements and one automatic false/full-support disagreement.
+The automatic proxy counts 19 of 36 returned excerpts as supported, versus 13 fully supporting excerpts
+under this audit. Thus the earlier description of the proxy as under-counting acceptable excerpts is
+incomplete: it can over-count incomplete excerpts as well. Neither proxy nor citation rate is semantic
+answer accuracy.
+
+The seven automatic positives judged partial are `q_19532ae3b1`, `q_fea44d1326`, `q_ea20eb6685`,
+`q_3e3e537581`, `q_eb5d3d7553`, `q_d8d50b1014` and `q_72930d866f`. The automatic negative judged
+supporting is `q_e812cb0b94`. The `q_3e3e537581` boundary depends on requiring support for the effective
+date asserted in the gold answer in addition to the cycle rule; that interpretation is disclosed.
+The results file contains a one-sentence rationale for every item.
+
+Partly answerable items are `q_82c80aa52c` (flattened table lacks interpretive column headings),
+`q_ae6e910e60`, `q_4972f5740c` and `q_a89d824d98` (operative requirement/compliance sections absent).
+Further gold-summary qualifications merit adjudication for `q_eb5d3d7553`, `q_d8d50b1014`,
+`q_dc8d895df8` and `q_72930d866f`; these were not silently marked wrong or removed.
+
+### Metrics with and without the audited wrong item
+
+The unchanged pipeline was rerun diagnostically for conditions A and B and reproduced the original
+frozen summaries exactly. Only `q_586be8bde6` was then excluded from aggregation. This is disclosed
+test-set reuse after the build, with no tuning and no replacement of the frozen final-run artifacts.
+The remaining 257 unaudited test items may still contain label defects.
+
+| Condition | n | Answered | Coverage | Answered & cites gold | Lexical support proxy | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| A, original | 297 | 276 | 92.93% | 92.93% | 51.18% | 98.99% | 100.00% | 0.9941 |
+| A, audited wrong item excluded | 296 | 276 | 93.24% | 93.24% | 51.35% | 98.99% | 100.00% | 0.9941 |
+| B, instrument name masked, original | 297 | 180 | 60.61% | 60.27% | 37.04% | 80.47% | 86.87% | 0.8269 |
+| B, audited wrong item excluded | 296 | 180 | 60.81% | 60.47% | 37.16% | 80.41% | 86.82% | 0.8264 |
+
+The excluded item was abstained on in both conditions. The support-proxy numerators remain 152 (A)
+and 110 (B). In the audited sample, excluding it changes full support from 13/40 to 13/39; returned
+excerpt support remains 13/36. The separate refusal set is unchanged (6/120 unsupported answers by
+the existing proxy); it was not covered by this label sample. No generalization of sample semantic
+support to all 297 questions is claimed.
+
+Reproduction identity: code fingerprint `46422f6e1b70832e`, corpus `c-968bf594e635`.
+
+| Artifact | SHA-256 |
+|---|---|
+| audit-sample.jsonl | `a0e7069da784bf3b33d884cd50f862d633648ac60d3582d093f37c9b58f3d4ea` |
+| audit-rubric.md | `117a9aa0ade5b4fc5bb98128743afc2821a96ab92bca09434adb6619a9c82c12` |
+| audit-results.jsonl | `1da4926d7c6e71d62642a42f61568061478e544aca385410fd8cda506b64580a` |
 
 ## Known gaps
 
@@ -156,6 +233,10 @@ and without items it marks invalid.
 - `tune_gate` does not reject an empty refusal set (it would treat "no refusals" as safe). Found while writing
   tests after the frozen run; not fixed, so as not to change the frozen code.
 - Excerpts are evidence, not tailored answers (support proxy 51.2%).
+- **Label audit findings not acted on (lack of time).** The independent audit found full support for 13 of
+  40 sampled items, a proxy that over-counts partial excerpts, and one wrong gold answer. None of this was
+  fixed; next steps would be a stricter support measure, correcting the gold label, and a human
+  adjudication of the borderline items.
 - No authentication; single-user, localhost only.
 - Windows was not run locally. CI (GitHub Actions run 38873931018) passes on Ubuntu and Windows after the commit 7 fix.
 - The 15-minute candidate walkthrough planned inside the build was not held (the candidate asked the agent
@@ -176,6 +257,7 @@ and without items it marks invalid.
 | Commit 6 (`7666a9f`, documentation) | 06:57 | 17:57; build clock stopped (1 h 21 min) |
 | Push approved by the candidate; first CI run: Ubuntu passed, Windows failed | 08:09 | packaging |
 | Commit 7: Windows compatibility fix (explicit UTF-8 in tests and `verify.py`, LF-insensitive comparison of generated files, CI failure annotations). No change to `src/`, so the frozen results stay valid | after 08:10 | packaging, disclosed |
+| Commit 8: independent label audit (OpenAI GPT-6 through Codex) recorded; documentation only, findings not acted on | 16 Oct, after the build | post-build, disclosed |
 
-Pushing to the public repository is a separate approval the candidate has not yet given. Commit times are
-corroborating evidence; this log is the primary record.
+The repository was pushed with the candidate's approval during packaging. Commit times are corroborating
+evidence; this log is the primary record.

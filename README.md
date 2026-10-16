@@ -120,7 +120,10 @@ uv run python scripts/build_corpus.py --raw data/raw/qa.jsonl
 ## Known limitations
 
 - **Excerpts, not tailored answers.** 92.9% of test questions are answered from the right passage, but only
-  51.2% of excerpts meet the strict, predeclared support measure.
+  51.2% of excerpts meet the strict, predeclared support measure. An independent AI label audit of 40 test
+  items found only 13 excerpts that fully support the answer, showed the measure also over-counts, and
+  found one wrong gold answer. Its findings are recorded in `evidence/verify.md` but were **not acted on
+  for lack of time**.
 - **Keyword retrieval.** With instrument names removed from questions, only 60.3% are answered from the
   right passage. Paraphrase and synonyms are the weak spot.
 - **Detectors are English and pattern-based.** They were tested on our own attack catalogue only, because
