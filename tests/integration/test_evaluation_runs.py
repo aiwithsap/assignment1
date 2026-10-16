@@ -28,7 +28,7 @@ def dev_results() -> dict[str, object]:
 
 
 def test_dev_run_reproduces_committed_dev_results(dev_results: dict[str, object]) -> None:
-    committed = json.loads((REPO / "eval/results/dev.json").read_text())
+    committed = json.loads((REPO / "eval/results/dev.json").read_text("utf-8"))
     for key in ("operating_point", "A", "B_masked", "negatives", "comparison_retrieval"):
         assert json.loads(json.dumps(dev_results[key])) == committed[key], key
 
@@ -47,11 +47,11 @@ def test_checks_pass_on_committed_state() -> None:
 
 
 def test_render_writes_generated_sections(tmp_path: Path) -> None:
-    dev = json.loads((REPO / "eval/results/dev.json").read_text())
-    final = json.loads((REPO / "eval/results/final.json").read_text())
+    dev = json.loads((REPO / "eval/results/dev.json").read_text("utf-8"))
+    final = json.loads((REPO / "eval/results/final.json").read_text("utf-8"))
     render(dev, final, tmp_path)
-    verify = (tmp_path / "verify.md").read_text()
-    security = (tmp_path / "security-report.md").read_text()
+    verify = (tmp_path / "verify.md").read_text("utf-8")
+    security = (tmp_path / "security-report.md").read_text("utf-8")
     assert "| AT1 |" in verify and "BEGIN GENERATED: results" in verify
     assert "Attack success by defence configuration" in security
 

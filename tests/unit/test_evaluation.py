@@ -68,15 +68,16 @@ def test_replace_section_preserves_commentary(tmp_path: Path) -> None:
     path = tmp_path / "doc.md"
     path.write_text(
         "# Title\n\nIntro.\n\n<!-- BEGIN GENERATED: x -->\nold\n"
-        "<!-- END GENERATED: x -->\n\nOutro.\n"
+        "<!-- END GENERATED: x -->\n\nOutro.\n",
+        "utf-8",
     )
     replace_section(path, "x", "new table")
-    text = path.read_text()
+    text = path.read_text("utf-8")
     assert "new table" in text and "old" not in text and text.endswith("Outro.\n")
 
 
 def test_acceptance_uses_predeclared_thresholds() -> None:
-    final = json.loads((REPO / "eval/results/final.json").read_text())
+    final = json.loads((REPO / "eval/results/final.json").read_text("utf-8"))
     results = check_acceptance(final, REPO / "eval/acceptance.toml")
     assert [r["id"] for r in results] == ["AT1", "AT2", "AT3", "AT4", "AT5"]
     assert results == final["acceptance"]
@@ -84,10 +85,10 @@ def test_acceptance_uses_predeclared_thresholds() -> None:
 
 @pytest.mark.parametrize("metric", ["security.rejection_rate", "security.attack_failure_rate"])
 def test_derived_security_metrics(metric: str) -> None:
-    final = json.loads((REPO / "eval/results/final.json").read_text())
+    final = json.loads((REPO / "eval/results/final.json").read_text("utf-8"))
     assert _derived(final, metric) == 1.0
 
 
 def test_committed_final_results_match_current_code() -> None:
-    manifest = json.loads((REPO / "eval/results/final-manifest.json").read_text())
+    manifest = json.loads((REPO / "eval/results/final-manifest.json").read_text("utf-8"))
     assert manifest["code_fingerprint"] == code_fingerprint()

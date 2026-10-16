@@ -107,10 +107,11 @@ class PayloadAnswerer:
 
 def test_output_guard_is_the_backstop_when_ingest_is_off(tmp_path: Path, sample_data: Path) -> None:
     labels = [
-        json.loads(x) for x in (sample_data / "adversarial/labels.jsonl").read_text().splitlines()
+        json.loads(x)
+        for x in (sample_data / "adversarial/labels.jsonl").read_text("utf-8").splitlines()
     ]
     phishing = next(label for label in labels if label["attack_id"] == "PI-T7a")
-    attack_questions = (sample_data / "adversarial/questions.jsonl").read_text().splitlines()
+    attack_questions = (sample_data / "adversarial/questions.jsonl").read_text("utf-8").splitlines()
     question = next(
         q["question"] for q in map(json.loads, attack_questions) if q["attack_id"] == "PI-T7a"
     )

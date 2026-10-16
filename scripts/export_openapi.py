@@ -28,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=Path("frontend/openapi.json"))
     args = parser.parse_args(argv)
-    args.out.write_text(schema_json(), "utf-8")
+    args.out.write_text(schema_json(), "utf-8", newline="\n")
     return 0
 
 

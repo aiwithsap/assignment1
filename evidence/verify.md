@@ -173,7 +173,9 @@ and without items it marks invalid.
 | Commit 3 (`dfeac92`) | 06:20 | |
 | Commit 4 (`0170b51`), including both final runs | 06:36 | |
 | Commit 5 (`89de1cf`) | 06:46 | |
-| Commit 6 (this documentation) | see git log | |
+| Commit 6 (`7666a9f`, documentation) | 06:57 | 17:57; build clock stopped (1 h 21 min) |
+| Push approved by the candidate; first CI run: Ubuntu passed, Windows failed | 08:09 | packaging |
+| Commit 7: Windows compatibility fix (explicit UTF-8 in tests and `verify.py`, LF-insensitive comparison of generated files, CI failure annotations). No change to `src/`, so the frozen results stay valid | after 08:10 | packaging, disclosed |
 
 Pushing to the public repository is a separate approval the candidate has not yet given. Commit times are
 corroborating evidence; this log is the primary record.

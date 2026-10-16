@@ -11,7 +11,7 @@ def env(tmp_path: Path) -> dict[str, str]:
 
 
 def test_ask_answers(tmp_path: Path, sample_data: Path) -> None:
-    question = json.loads((sample_data / "questions_dev.jsonl").read_text().splitlines()[0])
+    question = json.loads((sample_data / "questions_dev.jsonl").read_text("utf-8").splitlines()[0])
     result = CliRunner().invoke(app, ["ask", question["question"]], env=env(tmp_path))
     assert result.exit_code == 0, result.stdout
     assert json.loads(result.stdout)["outcome"] == "answered"

@@ -8,6 +8,7 @@ turns a skipped frontend step into a failure. Exit code is 1 if any step failed.
 """
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -45,6 +46,7 @@ class Status(StrEnum):
 class StepResult:
     status: Status
     detail: str = ""
+    output: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -56,12 +58,20 @@ class Step:
 def _run(cmd: list[str], cwd: Path = ROOT) -> StepResult:
     """Run a command; PASS on exit 0, otherwise FAIL with the tail of its output."""
     print(f"  $ {' '.join(cmd)}", flush=True)
-    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)
+    proc = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
     if proc.returncode == 0:
         return StepResult(Status.PASS)
     tail = (proc.stdout + proc.stderr).strip().splitlines()[-25:]
     print("\n".join(f"    {line}" for line in tail))
-    return StepResult(Status.FAIL, f"exit {proc.returncode}")
+    return StepResult(Status.FAIL, f"exit {proc.returncode}", tuple(tail))
 
 
 def _python(*args: str) -> list[str]:
@@ -112,6 +122,11 @@ def step_frontend(args: argparse.Namespace) -> StepResult:
     return StepResult(Status.PASS)
 
 
+def _lf(data: bytes) -> bytes:
+    """Compare generated files independent of the platform's line endings."""
+    return data.replace(b"\r\n", b"\n")
+
+
 def _generated_types_stale(npm: str) -> str | None:
     """The UI's API types must be generated from the current API schema."""
     schema = FRONTEND / "openapi.json"
@@ -120,12 +135,12 @@ def _generated_types_stale(npm: str) -> str | None:
         exported = _run([sys.executable, "scripts/export_openapi.py", "--out", str(fresh)])
         if exported.status is not Status.PASS:
             return "could not export the OpenAPI schema"
-        if not schema.is_file() or fresh.read_bytes() != schema.read_bytes():
+        if not schema.is_file() or _lf(fresh.read_bytes()) != _lf(schema.read_bytes()):
             return "frontend/openapi.json is stale: run scripts/export_openapi.py and gen:types"
     types = FRONTEND / "src" / "api" / "schema.d.ts"
     before = types.read_bytes() if types.is_file() else b""
     generated = _run([npm, "run", "--silent", "gen:types"], cwd=FRONTEND)
-    if generated.status is not Status.PASS or types.read_bytes() != before:
+    if generated.status is not Status.PASS or _lf(types.read_bytes()) != _lf(before):
         return "src/api/schema.d.ts was stale and has been regenerated; commit it"
     return None
 
@@ -137,6 +152,7 @@ def _candidate_files() -> list[str]:
         cwd=ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     )
     return sorted({line for line in proc.stdout.splitlines() if line})
@@ -210,6 +226,12 @@ def main(argv: list[str] | None = None) -> int:
     for name, result, secs in results:
         print(f"{name:<20} {result.status:<8} {secs:6.1f}  {result.detail}")
     failed = [name for name, result, _ in results if result.status is Status.FAIL]
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        # Surface failures as annotations, which are readable without downloading logs.
+        for name, result, _ in results:
+            if result.status is Status.FAIL:
+                body = "%0A".join([result.detail, *result.output[-15:]]).replace("::", ": :")
+                print(f"::error title=verify {name}::{body}")
     print(f"\n{'FAILED: ' + ', '.join(failed) if failed else 'OK: no failures'}")
     return 1 if failed else 0
 
