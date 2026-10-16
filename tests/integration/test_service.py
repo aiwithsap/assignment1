@@ -119,7 +119,9 @@ def test_output_guard_is_the_backstop_when_ingest_is_off(tmp_path: Path, sample_
     )
     defences = Defences(ingest=IngestPolicy(provenance=False, content_scan=False))
     service = AnswerService(
-        settings(tmp_path, sample_data, profile=Profile.EVAL, gate_min_strength=0.0),
+        settings(
+            tmp_path, sample_data, profile=Profile.EVAL, gate_min_strength=0.0, gate_min_margin=0.0
+        ),
         defences=defences,
         answerer=PayloadAnswerer(payload),
     )
@@ -128,7 +130,9 @@ def test_output_guard_is_the_backstop_when_ingest_is_off(tmp_path: Path, sample_
     assert response.result.abstain_reason is AbstainReason.UNSAFE_OUTPUT
 
     unguarded = AnswerService(
-        settings(tmp_path, sample_data, profile=Profile.EVAL, gate_min_strength=0.0),
+        settings(
+            tmp_path, sample_data, profile=Profile.EVAL, gate_min_strength=0.0, gate_min_margin=0.0
+        ),
         defences=Defences(ingest=defences.ingest, output_guard=False),
         answerer=PayloadAnswerer(payload),
     )

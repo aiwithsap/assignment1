@@ -88,11 +88,8 @@ def step_corpus(_: argparse.Namespace) -> StepResult:
 
 
 def step_evaluation(_: argparse.Namespace) -> StepResult:
-    return StepResult(Status.SKIPPED, "evaluation not built yet (planned: commit 4)")
-
-
-def step_security(_: argparse.Namespace) -> StepResult:
-    return StepResult(Status.SKIPPED, "security suite not built yet (planned: commit 4)")
+    """Dev regression floors, AT3-AT5 on the security suite, and frozen-final integrity."""
+    return _run(_python("legisqa", "eval", "check"))
 
 
 def step_frontend(args: argparse.Namespace) -> StepResult:
@@ -164,8 +161,7 @@ STEPS = [
     Step("types", step_types),
     Step("tests", step_tests),
     Step("corpus-integrity", step_corpus),
-    Step("evaluation", step_evaluation),
-    Step("security-suite", step_security),
+    Step("evaluation+security", step_evaluation),
     Step("frontend", step_frontend),
     Step("hygiene", step_hygiene),
 ]
@@ -188,9 +184,9 @@ def main(argv: list[str] | None = None) -> int:
         results.append((step.name, result, time.perf_counter() - started))
 
     print("\nverify summary")
-    print(f"{'step':<18} {'status':<8} {'secs':>6}  detail")
+    print(f"{'step':<20} {'status':<8} {'secs':>6}  detail")
     for name, result, secs in results:
-        print(f"{name:<18} {result.status:<8} {secs:6.1f}  {result.detail}")
+        print(f"{name:<20} {result.status:<8} {secs:6.1f}  {result.detail}")
     failed = [name for name, result, _ in results if result.status is Status.FAIL]
     print(f"\n{'FAILED: ' + ', '.join(failed) if failed else 'OK: no failures'}")
     return 1 if failed else 0

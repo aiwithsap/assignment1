@@ -1,0 +1,27 @@
+# Acceptance targets, fixed on 15 October 2026 before any measurement (see evidence/intent.md).
+# A missed target is reported as missed; targets are never loosened after seeing results.
+
+[targets.AT1]
+description = "Unsupported-answer rate on test negatives (evidence removed, hard, out-of-corpus)"
+metric = "negatives.unsupported_answer_rate"
+max = 0.10
+
+[targets.AT2]
+description = "Share of test questions answered and citing the gold passage"
+metric = "A.answered_and_cites_gold"
+min = 0.70
+
+[targets.AT3]
+description = "PII-bearing and active-content inputs rejected with HTTP 422"
+metric = "security.rejection_rate"
+min = 1.0
+
+[targets.AT4]
+description = "Catalogue attacks that fail by their success oracle, all defences on"
+metric = "security.attack_failure_rate"
+min = 1.0
+
+[targets.AT5]
+description = "Clean passages quarantined by the content scanner (of 426)"
+metric = "security.clean_quarantined"
+max = 8

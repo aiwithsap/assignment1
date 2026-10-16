@@ -1,6 +1,7 @@
 """Command-line interface. Further commands (ask, serve, eval) arrive with their features."""
 
 import json
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -11,9 +12,16 @@ from legisqa.api import create_app
 from legisqa.config import Profile, Settings
 from legisqa.corpus import load_corpus
 from legisqa.errors import EXIT_CODE, Outcome, RejectionError, StartupError, UnavailableError
+from legisqa.evaluation.checks import run_checks
+from legisqa.evaluation.harness import dev_run, final_run, write_json
+from legisqa.evaluation.report import render
 from legisqa.logging_setup import configure_logging
 from legisqa.models import ErrorEnvelope, Jurisdiction
 from legisqa.service import AnswerService
+
+eval_app = typer.Typer(
+    no_args_is_help=True, help="Offline evaluation (dev tuning, frozen final run, checks)."
+)
 
 ProfileOption = Annotated[
     Profile | None, typer.Option("--profile", help="Override LEGISQA_PROFILE.")
@@ -36,6 +44,9 @@ def main(
     ] = False,
 ) -> None:
     """Grounded Q&A over Australian legislation."""
+
+
+app.add_typer(eval_app, name="eval")
 
 
 @app.command("show-config")
@@ -113,3 +124,60 @@ def serve(profile: ProfileOption = None) -> None:
     settings = _settings(profile)
     configure_logging(settings.log_level)
     uvicorn.run(create_app(settings), host=settings.host, port=settings.port, log_config=None)
+
+
+RESULTS = Path("eval/results")
+
+
+@eval_app.command("dev")
+def eval_dev() -> None:
+    """Tune on the dev split and write eval/results/dev.json (never reads the test split)."""
+    results = dev_run(Settings().data_dir, Settings())
+    write_json(RESULTS / "dev.json", results)
+    typer.echo(
+        json.dumps(
+            {
+                "operating_point": results["operating_point"],
+                "A": results["A"],
+                "negatives": results["negatives"],
+            },
+            indent=2,
+        )
+    )
+
+
+@eval_app.command("final")
+def eval_final() -> None:
+    """The frozen test run with the configured operating point; renders the evidence tables."""
+    settings = Settings()
+    dev_path = RESULTS / "dev.json"
+    if not dev_path.is_file():
+        typer.echo("run `legisqa eval dev` first", err=True)
+        raise typer.Exit(1)
+    chosen = json.loads(dev_path.read_text("utf-8"))["operating_point"]
+    configured = {
+        "gate_min_strength": settings.gate_min_strength,
+        "gate_min_margin": settings.gate_min_margin,
+        "max_excerpt_sentences": settings.max_excerpt_sentences,
+    }
+    mismatched = {k: (v, chosen[k]) for k, v in configured.items() if chosen[k] != v}
+    if mismatched:
+        # Guard added after a misconfigured first final run (see evidence/verify.md).
+        typer.echo(f"configured operating point differs from dev.json: {mismatched}", err=True)
+        raise typer.Exit(1)
+    final = final_run(settings.data_dir, settings, RESULTS, audit_dir=Path("evidence/review"))
+    render(json.loads(dev_path.read_text("utf-8")), final, Path("evidence"))
+    typer.echo(json.dumps(final["acceptance"], indent=2))
+
+
+@eval_app.command("check")
+def eval_check() -> None:
+    """CI gate: dev regression floors, dev safety targets, the security suite, and whether the
+    committed final results still correspond to the current code and data."""
+    settings = Settings()
+    problems = run_checks(settings, Path("eval"))
+    for line in problems:
+        typer.echo(f"FAIL {line}")
+    if problems:
+        raise typer.Exit(1)
+    typer.echo("eval check: all gates passed")

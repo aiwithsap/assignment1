@@ -262,6 +262,7 @@ def build_overlay(
         if "{stuffing}" in payload:
             stuffing = " ".join(content_words(target.question) * 6)
             payload = payload.replace("{stuffing}", stuffing)
+        payload = payload.replace("{echo}", target.question)
         text = original.text
         if attack["position"] == "start":
             new_text, start = f"{payload} {text}", 0

@@ -1,0 +1,12 @@
+{
+  "code_fingerprint": "46422f6e1b70832e",
+  "corpus_version": "c-968bf594e635",
+  "data_manifest_sha256": "07ed2c8a12077cedfea44d73a95b35bda6298114d67e54017acc6eacd30d42bb",
+  "note": "Frozen final test run. If the code fingerprint changes, re-running is a re-use of the test set and must be disclosed.",
+  "operating_point": {
+    "gate_min_margin": 0.15,
+    "gate_min_strength": 0.88,
+    "max_excerpt_sentences": 2
+  },
+  "ts": "2026-10-16T06:28:43.197305+00:00"
+}

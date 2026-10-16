@@ -1,0 +1,10 @@
+# Regression floors: set from the first measured dev run (eval/results/dev.json) minus a stated
+# margin of 0.05 absolute, to stop backsliding. They are not evidence of quality; the acceptance
+# targets in acceptance.toml are, and those were fixed before any measurement.
+[dev.min]
+answered_and_cites_gold = 0.8875  # measured 0.9375
+supported = 0.5047                # measured 0.5547
+recall_at_5 = 0.95                # measured 1.0
+
+[dev.max]
+unsupported_answer_rate = 0.10    # measured 0.0743; ceiling equals acceptance target AT1

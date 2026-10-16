@@ -97,5 +97,6 @@ def test_chunk_records_carry_no_evaluation_labels() -> None:
 
 def test_loading_never_needs_the_label_file(sample_data_copy: Path) -> None:
     (sample_data_copy / "adversarial/labels.jsonl").unlink()
+    expected = len((sample_data_copy / "adversarial/questions.jsonl").read_text().splitlines())
     corpus = load_corpus(sample_data_copy, include_overlay=True)
-    assert len(corpus.quarantined) == 28
+    assert len(corpus.quarantined) == expected

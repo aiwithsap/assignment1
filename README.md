@@ -35,6 +35,18 @@ uv run legisqa verify-corpus         # manifest hashes, overlay isolation, quara
 `ask` prints the JSON response. Exit codes follow the outcome contract: 0 answered or abstained,
 2 rejected input, 3 service unavailable, 1 internal error.
 
+## Evaluate
+
+```bash
+uv run legisqa eval dev     # tune on the dev split only; writes eval/results/dev.json
+uv run legisqa eval final   # frozen test run with the dev-chosen settings; renders evidence tables
+uv run legisqa eval check   # CI gate: dev floors, security targets, frozen-run integrity
+```
+
+Results (acceptance targets fixed before measurement) are in
+[`evidence/verify.md`](evidence/verify.md) and the attack interception report in
+[`evidence/security-report.md`](evidence/security-report.md).
+
 ## Data
 
 `sample-data/` holds 426 passages of Commonwealth and state legislation (CC BY 4.0, see

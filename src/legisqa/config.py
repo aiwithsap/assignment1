@@ -42,9 +42,10 @@ class Settings(BaseSettings):
     max_question_chars: int = Field(default=500, ge=10, le=5000)
     top_k: int = Field(default=5, ge=1, le=20)
 
-    # Answerability gate: development defaults, tuned on the dev split only.
-    gate_min_strength: float = Field(default=0.3, ge=0.0, le=1.0)
-    gate_min_margin: float = Field(default=0.0, ge=0.0)
+    # Answerability gate. Operating point chosen on the dev split only (eval/results/dev.json):
+    # the highest dev coverage whose dev unsupported-answer rate stays at or below 8%.
+    gate_min_strength: float = Field(default=0.88, ge=0.0, le=1.0)
+    gate_min_margin: float = Field(default=0.15, ge=0.0)
     max_excerpt_sentences: int = Field(default=2, ge=1, le=5)
 
     @model_validator(mode="after")

@@ -14,7 +14,7 @@ from typing import Any
 from legisqa.answerers.base import Answerer
 from legisqa.answerers.extractive import ExtractiveAnswerer
 from legisqa.audit import AuditLog
-from legisqa.citations import validate_citations
+from legisqa.citations import CitationFailure, validate_citations
 from legisqa.config import Settings
 from legisqa.corpus import Corpus, IngestPolicy, load_corpus
 from legisqa.errors import (
@@ -29,7 +29,8 @@ from legisqa.guards import check_question
 from legisqa.logging_setup import fingerprint, request_id_var
 from legisqa.models import AbstainReason, AnswerResponse, GroundedAnswer, Jurisdiction
 from legisqa.output_guard import check_output
-from legisqa.retrieval import Retriever
+from legisqa.retrieval import Retriever, SearchResult
+from legisqa.security.detectors import Finding
 from legisqa.security.events import EventAction, EventSource, EventStore, make_event
 
 log = logging.getLogger("legisqa.service")
@@ -37,6 +38,51 @@ log = logging.getLogger("legisqa.service")
 # Readiness warning: more clean-namespace chunks quarantined than this suggests a poisoned
 # corpus release rather than isolated false positives.
 MAX_EXPECTED_CLEAN_QUARANTINE = 8
+
+
+@dataclass(frozen=True)
+class PipelineResult:
+    search: SearchResult
+    gate_passed: bool
+    answer: GroundedAnswer
+    citation_failure: CitationFailure | None = None
+    output_findings: tuple[Finding, ...] = ()
+
+
+def run_pipeline(
+    question: str,
+    *,
+    corpus: Corpus,
+    retriever: Retriever,
+    answerer: Answerer,
+    settings: Settings,
+    output_guard: bool = True,
+    jurisdiction: Jurisdiction | None = None,
+) -> PipelineResult:
+    """Retrieve, gate, answer, validate citations and guard the output. Pure: no I/O.
+
+    Shared by the service and the evaluation harness, so evaluation measures exactly the
+    code path that serves requests.
+    """
+    search = retriever.search(question, k=settings.top_k, jurisdiction=jurisdiction)
+    gate = decide(search, settings.gate_min_strength, settings.gate_min_margin)
+    abstain_low = GroundedAnswer.abstained(AbstainReason.LOW_EVIDENCE)
+    if not gate.passed:
+        return PipelineResult(search, False, abstain_low)
+    candidate = answerer.answer(question, search.hits, corpus)
+    if candidate is None:
+        return PipelineResult(search, True, abstain_low)
+    failure = validate_citations(candidate, corpus, {h.chunk_id for h in search.hits})
+    if failure is not None:
+        return PipelineResult(
+            search, True, GroundedAnswer.abstained(AbstainReason.UNGROUNDED), failure
+        )
+    if output_guard and candidate.answer is not None:
+        findings = tuple(check_output(candidate.answer))
+        if findings:
+            unsafe = GroundedAnswer.abstained(AbstainReason.UNSAFE_OUTPUT)
+            return PipelineResult(search, True, unsafe, output_findings=findings)
+    return PipelineResult(search, True, candidate)
 
 
 @dataclass(frozen=True)
@@ -161,24 +207,38 @@ class AnswerService:
         event_ids: list[str],
         started: float,
     ) -> AnswerResponse:
-        result = retriever.search(question, k=self.settings.top_k, jurisdiction=jurisdiction)
-        gate = decide(result, self.settings.gate_min_strength, self.settings.gate_min_margin)
+        result = run_pipeline(
+            question,
+            corpus=corpus,
+            retriever=retriever,
+            answerer=answerer,
+            settings=self.settings,
+            output_guard=self.defences.output_guard,
+            jurisdiction=jurisdiction,
+        )
         log.info(
             "retrieved",
             extra={
                 "stage": "retrieve",
-                "hits": len(result.hits),
-                "strength": round(gate.strength, 4),
-                "margin": round(gate.margin, 4),
-                "gate_passed": gate.passed,
+                "hits": len(result.search.hits),
+                "strength": round(result.search.strength, 4),
+                "margin": round(result.search.margin, 4),
+                "gate_passed": result.gate_passed,
             },
         )
-        answer = GroundedAnswer.abstained(AbstainReason.LOW_EVIDENCE)
-        if gate.passed:
-            candidate = answerer.answer(question, result.hits, corpus)
-            if candidate is not None:
-                retrieved = {h.chunk_id for h in result.hits}
-                answer = self._checked(corpus, candidate, retrieved, request_id, event_ids)
+        if result.citation_failure is not None:
+            log.warning(
+                "citation rejected",
+                extra={"stage": "validate", "failure": result.citation_failure.value},
+            )
+        for finding in result.output_findings:
+            event = make_event(
+                finding, EventSource.RESPONSE, EventAction.ABSTAINED, request_id=request_id
+            )
+            event_ids.append(self.events.add(event).event_id)
+        if result.output_findings:
+            log.warning("unsafe output withheld", extra={"stage": "validate"})
+        answer = result.answer
         outcome = Outcome.ANSWERED if answer.answer is not None else Outcome.ABSTAINED
         log.info("answered", extra={"stage": "answer", "outcome": outcome.value})
         return AnswerResponse(
@@ -186,34 +246,10 @@ class AnswerService:
             outcome=outcome,
             corpus_version=corpus.version,
             result=answer,
-            retrieved=result.hits,
+            retrieved=result.search.hits,
             security_event_ids=tuple(event_ids),
             latency_ms=round((time.perf_counter() - started) * 1000, 3),
         )
-
-    def _checked(
-        self,
-        corpus: Corpus,
-        candidate: GroundedAnswer,
-        retrieved: set[str],
-        request_id: str,
-        event_ids: list[str],
-    ) -> GroundedAnswer:
-        failure = validate_citations(candidate, corpus, retrieved)
-        if failure is not None:
-            log.warning("citation rejected", extra={"stage": "validate", "failure": failure.value})
-            return GroundedAnswer.abstained(AbstainReason.UNGROUNDED)
-        if self.defences.output_guard and candidate.answer is not None:
-            findings = check_output(candidate.answer)
-            if findings:
-                for finding in findings:
-                    event = make_event(
-                        finding, EventSource.RESPONSE, EventAction.ABSTAINED, request_id=request_id
-                    )
-                    event_ids.append(self.events.add(event).event_id)
-                log.warning("unsafe output withheld", extra={"stage": "validate"})
-                return GroundedAnswer.abstained(AbstainReason.UNSAFE_OUTPUT)
-        return candidate
 
     @staticmethod
     def _audit_record(base: dict[str, Any], response: AnswerResponse) -> dict[str, Any]:

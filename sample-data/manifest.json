@@ -1,7 +1,7 @@
 {
   "attack_set": {
-    "attacks": 28,
-    "catalogue_sha256": "77e44666ec942fe0ead7e23b2aa5313b85f50c28216b92a2f887149d04a3ad6d"
+    "attacks": 31,
+    "catalogue_sha256": "bc8a490eb131c842e7a2967f6eed02a91f51fd2afe7e125103d6e402f9c984c5"
   },
   "chunk_text_sha256": {
     "federal_register_of_legislation:C2005A00028": "ce531cbbd477415cea08b98d70fe8151c0acca6832f46d6cb0ab861e41d1392d",
@@ -433,15 +433,15 @@
   },
   "corpus_version": "c-968bf594e635",
   "files": {
-    "adversarial/injected_chunks.jsonl": "e118f3e1a75c6d3b1ae4c1d085b2958ab8841b5c111d6f0f00374e99dece94ea",
-    "adversarial/labels.jsonl": "3872c410fc865814dfad1309c3b7749e3731a982a4eea66d213881aaef0b406e",
-    "adversarial/questions.jsonl": "e26c9f3d8919deef2b2e8ddc9ffbe5d961b22a8ee22e9a7ba7202ee56031d280",
+    "adversarial/injected_chunks.jsonl": "ca5eacfe925b4db7a89c64e0e6550b1b3d8c1db70a283872b88067b65fa21ce8",
+    "adversarial/labels.jsonl": "ab7f784c44d06cc7ad45123f1be6d3e9cb6393c1927e0a3286d3587c43354d6b",
+    "adversarial/questions.jsonl": "8c20ee75c49b388b6d5a85adfa61d16efd7c18fb72197ee24e10209b435eed56",
     "corpus.jsonl": "968bf594e63570918619858ac6d50caee6f7d110ca5f0aa737c2a1f835e292fa",
     "negatives_dev.jsonl": "c82987ee02d72ccb89101c7e7178405a1bd31188d988fedf487dc1781c4d4095",
     "negatives_test.jsonl": "f7567225a9bacfa199bb9c561d02fd810dbe4d2d0e8e390904abd0de35533850",
     "questions_dev.jsonl": "ddde4304425351a96e9061fbb601e8b8b7e934b94716744eaea8a274adea425f",
     "questions_test.jsonl": "99edfba31567b363dfd2170c390721cd8f427e1fcb0807fdcbc5d5e8c7957c5c",
-    "sources/attack_catalogue.json": "77e44666ec942fe0ead7e23b2aa5313b85f50c28216b92a2f887149d04a3ad6d",
+    "sources/attack_catalogue.json": "bc8a490eb131c842e7a2967f6eed02a91f51fd2afe7e125103d6e402f9c984c5",
     "sources/direct_injections.json": "3726d2fd08657daea4f1b8ad090f3afb1ff8d65c57573bea9e796d6790374fad",
     "sources/out_of_corpus.json": "565cf2bb7a312189b9a6a8ea5e48ee769592723f4e9b0d99b3e1b117cf100a21"
   },
