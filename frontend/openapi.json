@@ -1,0 +1,747 @@
+{
+  "components": {
+    "schemas": {
+      "AbstainReason": {
+        "enum": [
+          "low_evidence",
+          "ungrounded",
+          "unsafe_output"
+        ],
+        "title": "AbstainReason",
+        "type": "string"
+      },
+      "AnswerResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "corpus_version": {
+            "minLength": 1,
+            "title": "Corpus Version",
+            "type": "string"
+          },
+          "latency_ms": {
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "type": "number"
+          },
+          "notice": {
+            "default": "Evidence excerpts from public legislation, provided for research. Not legal advice.",
+            "title": "Notice",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "request_id": {
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/GroundedAnswer"
+          },
+          "retrieved": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Hit"
+            },
+            "title": "Retrieved",
+            "type": "array"
+          },
+          "security_event_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Security Event Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "request_id",
+          "outcome",
+          "corpus_version",
+          "result",
+          "latency_ms"
+        ],
+        "title": "AnswerResponse",
+        "type": "object"
+      },
+      "AnswerStatus": {
+        "enum": [
+          "answered",
+          "abstained"
+        ],
+        "title": "AnswerStatus",
+        "type": "string"
+      },
+      "AskRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Jurisdiction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "question": {
+            "maxLength": 20000,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "title": "AskRequest",
+        "type": "object"
+      },
+      "Chunk": {
+        "additionalProperties": false,
+        "description": "One retrievable passage of legislation.\n\nThe record deliberately carries no evaluation labels: whether a chunk is part of the\nadversarial test overlay is held in a separate label file the detectors never read.",
+        "properties": {
+          "chunk_id": {
+            "pattern": "^(c|adv)_[0-9a-f]{12}$",
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "citation": {
+            "minLength": 1,
+            "title": "Citation",
+            "type": "string"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocType"
+          },
+          "jurisdiction": {
+            "$ref": "#/components/schemas/Jurisdiction"
+          },
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "url": {
+            "pattern": "^https://",
+            "title": "Url",
+            "type": "string"
+          },
+          "version_id": {
+            "minLength": 1,
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chunk_id",
+          "version_id",
+          "citation",
+          "jurisdiction",
+          "doc_type",
+          "url",
+          "text"
+        ],
+        "title": "Chunk",
+        "type": "object"
+      },
+      "Citation": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_id": {
+            "pattern": "^(c|adv)_[0-9a-f]{12}$",
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "quote": {
+            "maxLength": 4000,
+            "minLength": 20,
+            "title": "Quote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chunk_id",
+          "quote"
+        ],
+        "title": "Citation",
+        "type": "object"
+      },
+      "DocType": {
+        "enum": [
+          "primary_legislation",
+          "secondary_legislation"
+        ],
+        "title": "DocType",
+        "type": "string"
+      },
+      "ErrorEnvelope": {
+        "additionalProperties": false,
+        "description": "Body for every non-answer outcome (HTTP 422, 503 and 500).",
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "request_id": {
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "outcome",
+          "message"
+        ],
+        "title": "ErrorEnvelope",
+        "type": "object"
+      },
+      "EventAction": {
+        "enum": [
+          "quarantined",
+          "rejected",
+          "logged",
+          "abstained"
+        ],
+        "title": "EventAction",
+        "type": "string"
+      },
+      "EventSource": {
+        "enum": [
+          "corpus",
+          "question",
+          "response"
+        ],
+        "title": "EventSource",
+        "type": "string"
+      },
+      "GroundedAnswer": {
+        "additionalProperties": false,
+        "description": "An evidence excerpt with citations, or a reasoned abstention. Never both.",
+        "properties": {
+          "abstain_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AbstainReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "citations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AnswerStatus"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "GroundedAnswer",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Hit": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_id": {
+            "pattern": "^(c|adv)_[0-9a-f]{12}$",
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "score": {
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "number"
+          },
+          "top_terms": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Top Terms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "chunk_id",
+          "score"
+        ],
+        "title": "Hit",
+        "type": "object"
+      },
+      "Jurisdiction": {
+        "enum": [
+          "commonwealth",
+          "new_south_wales",
+          "queensland",
+          "western_australia",
+          "south_australia",
+          "tasmania",
+          "norfolk_island"
+        ],
+        "title": "Jurisdiction",
+        "type": "string"
+      },
+      "Outcome": {
+        "enum": [
+          "answered",
+          "abstained",
+          "rejected",
+          "unavailable",
+          "internal_error"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      },
+      "ReadinessView": {
+        "properties": {
+          "clean_chunks": {
+            "title": "Clean Chunks",
+            "type": "integer"
+          },
+          "corpus_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corpus Version"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "quarantined_chunks": {
+            "title": "Quarantined Chunks",
+            "type": "integer"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ready",
+          "reasons",
+          "warnings",
+          "corpus_version",
+          "profile",
+          "clean_chunks",
+          "quarantined_chunks"
+        ],
+        "title": "ReadinessView",
+        "type": "object"
+      },
+      "SecurityEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/EventAction"
+          },
+          "chunk_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunk Id"
+          },
+          "detector": {
+            "title": "Detector",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "matched_sha256_16": {
+            "title": "Matched Sha256 16",
+            "type": "string"
+          },
+          "matched_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Text"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          },
+          "severity": {
+            "title": "Severity",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EventSource"
+          },
+          "span": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Span",
+            "type": "array"
+          },
+          "ts": {
+            "title": "Ts",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "ts",
+          "source",
+          "action",
+          "detector",
+          "severity",
+          "rule",
+          "span",
+          "matched_sha256_16"
+        ],
+        "title": "SecurityEvent",
+        "type": "object"
+      },
+      "SourceView": {
+        "properties": {
+          "chunk": {
+            "$ref": "#/components/schemas/Chunk"
+          },
+          "detectors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Detectors",
+            "type": "array"
+          },
+          "quarantine_layer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quarantine Layer"
+          },
+          "quarantined": {
+            "title": "Quarantined",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "chunk",
+          "quarantined"
+        ],
+        "title": "SourceView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Legislation Q&A",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "ui_missing__get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ui Missing"
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Healthz Healthz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz"
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readyz"
+      }
+    },
+    "/v1/answers": {
+      "post": {
+        "operationId": "answers_v1_answers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Answers"
+      }
+    },
+    "/v1/security-events": {
+      "get": {
+        "operationId": "security_events_v1_security_events_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SecurityEvent"
+                  },
+                  "title": "Response Security Events V1 Security Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Security Events"
+      }
+    },
+    "/v1/sources/{chunk_id}": {
+      "get": {
+        "operationId": "source_v1_sources__chunk_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chunk_id",
+            "required": true,
+            "schema": {
+              "title": "Chunk Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Source"
+      }
+    }
+  }
+}

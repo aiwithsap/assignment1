@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -101,11 +102,32 @@ def step_frontend(args: argparse.Namespace) -> StepResult:
         installed = _run([npm, "ci", "--no-audit", "--no-fund"], cwd=FRONTEND)
         if installed.status is not Status.PASS:
             return installed
+    stale = _generated_types_stale(npm)
+    if stale:
+        return StepResult(Status.FAIL, stale)
     for script in ("typecheck", "test", "build"):
         result = _run([npm, "run", "--silent", script], cwd=FRONTEND)
         if result.status is not Status.PASS:
             return StepResult(Status.FAIL, f"npm run {script} failed")
     return StepResult(Status.PASS)
+
+
+def _generated_types_stale(npm: str) -> str | None:
+    """The UI's API types must be generated from the current API schema."""
+    schema = FRONTEND / "openapi.json"
+    with tempfile.TemporaryDirectory() as tmp:
+        fresh = Path(tmp) / "openapi.json"
+        exported = _run([sys.executable, "scripts/export_openapi.py", "--out", str(fresh)])
+        if exported.status is not Status.PASS:
+            return "could not export the OpenAPI schema"
+        if not schema.is_file() or fresh.read_bytes() != schema.read_bytes():
+            return "frontend/openapi.json is stale: run scripts/export_openapi.py and gen:types"
+    types = FRONTEND / "src" / "api" / "schema.d.ts"
+    before = types.read_bytes() if types.is_file() else b""
+    generated = _run([npm, "run", "--silent", "gen:types"], cwd=FRONTEND)
+    if generated.status is not Status.PASS or types.read_bytes() != before:
+        return "src/api/schema.d.ts was stale and has been regenerated; commit it"
+    return None
 
 
 def _candidate_files() -> list[str]:

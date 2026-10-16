@@ -59,6 +59,19 @@ committed) is deterministic:
 uv run python scripts/build_corpus.py --raw data/raw/qa.jsonl
 ```
 
+## Browser UI
+
+```bash
+cd frontend && npm ci && npm run build && cd ..
+uv run legisqa serve --profile demo   # open http://127.0.0.1:8000
+```
+
+The UI is a thin client of the API: its TypeScript types are generated from the API's OpenAPI
+schema (`uv run python scripts/export_openapi.py` then `npm run gen:types`), and every string is
+rendered as plain text. In the `demo` profile it also lists the content intercepted at load time.
+
+![Answer with a verified citation in the margin](evidence/screenshots/answer.png)
+
 ## Verify
 
 One command runs every check CI runs and prints a PASS / FAIL / SKIPPED table:

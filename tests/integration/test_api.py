@@ -101,3 +101,16 @@ def test_sources_and_ui_hint(tmp_path: Path, sample_data: Path) -> None:
     source = api.get(f"/v1/sources/{first['chunk_id']}").json()
     assert source["quarantined"] is False and source["chunk"]["text"] == first["text"]
     assert "UI has not been built" in api.get("/").text
+
+
+def test_built_ui_is_served_with_security_headers(tmp_path: Path, sample_data: Path) -> None:
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "index.html").write_text("<!doctype html><title>Legislation Q&amp;A</title>", "utf-8")
+    settings = Settings(  # type: ignore[call-arg]
+        _env_file=None, data_dir=sample_data, var_dir=tmp_path / "var", frontend_dist=dist
+    )
+    api = TestClient(create_app(settings))
+    page = api.get("/")
+    assert page.status_code == 200 and "Legislation Q&amp;A" in page.text
+    assert "frame-ancestors 'none'" in page.headers["Content-Security-Policy"]
