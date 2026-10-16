@@ -7,13 +7,13 @@ not run, not applicable. Execution identity for all results: code fingerprint `4
 | # | Requirement (paraphrased) | Mechanism | Evidence | Status | Remaining limitation |
 |---|---|---|---|---|---|
 | 1 | Build within about 3 hours, plus up to 15 minutes packaging | Six commits, hard stop rule | `verify.md` timebox log | Demonstrated | Planning time before the clock is disclosed, not counted |
-| 2 | Public repository with regular incremental commits; no history rewriting | Six commits, never amended or squashed | `git log` | Partial | Not yet pushed: pushing awaits the candidate's approval |
+| 2 | Public repository with regular incremental commits; no history rewriting | Six build commits plus a packaging fix, never amended or squashed | `git log` on github.com/aiwithsap/assignment1 (public) | Demonstrated | Pushed after the build, with commit times preserved |
 | 3 | AI coding agent as primary implementation tool | Claude (Opus 5.5) wrote and ran everything | `agentic-workflow.md` | Demonstrated | |
 | 4 | Meaningful solution, clear outcome, credible in a regulated enterprise | Cited evidence excerpts, abstain, injection defences, audit | `design.md`; AT1 to AT5 pass | Demonstrated | Excerpts are evidence, not tailored answers |
 | 5 | Product AI optional | No LLM in the product | `decisions.md` D2 | Demonstrated | |
 | 6 | One meaningful end-to-end workflow | Question to audited answer via CLI, API and UI | `tests/integration/test_service.py`, `test_api.py`; README example; screenshots | Demonstrated | |
 | 7 | Full-stack ownership of the slice | Data build, service, API, CLI, UI, evaluation, CI, operations | Repository; clean-checkout run | Demonstrated | |
-| 8 | Clear setup and run instructions | README | Clean-checkout run (Linux), commands run verbatim | Demonstrated | Windows only via CI after push |
+| 8 | Clear setup and run instructions | README | Clean-checkout run (Linux), commands run verbatim; CI green on Ubuntu and Windows | Demonstrated | |
 | 9 | A simple build/test/verify command | `scripts/verify.py` | Same command in `.github/workflows/ci.yml` | Demonstrated | |
 | 10 | Tests, evaluation or acceptance checks | 177 Python and 13 UI tests; acceptance targets AT1 to AT6 | `verify.md` | Demonstrated | Held-out attack set not run |
 | 11 | Safe handling of configuration | Typed immutable settings, fail-fast validation, safe `prod` default | `tests/unit/test_config.py` | Demonstrated | No hot reload (restart required, documented) |

@@ -22,7 +22,7 @@ UI check into a failure.
 On 16 October 2026 (06:47 UTC) commit `89de1cf` was cloned into an empty directory on Linux (Python 3.12
 via uv, Node 22) and the README commands were run verbatim: `uv sync --locked`, `legisqa ask ...` (answered
 from the expected passage, exit 0) and `scripts/verify.py --require-frontend`: **all steps PASS**,
-including `npm ci` from the lockfile. Windows is covered only by the CI matrix, once pushed. Commit 6 changes
+including `npm ci` from the lockfile. Windows is covered by the CI matrix, which passes on both operating systems after commit 7. Commit 6 changes
 documentation only.
 
 ## How the numbers were produced
@@ -157,7 +157,7 @@ and without items it marks invalid.
   tests after the frozen run; not fixed, so as not to change the frozen code.
 - Excerpts are evidence, not tailored answers (support proxy 51.2%).
 - No authentication; single-user, localhost only.
-- Windows not run locally; covered by CI once pushed.
+- Windows was not run locally. CI (GitHub Actions run 38873931018) passes on Ubuntu and Windows after the commit 7 fix.
 - The 15-minute candidate walkthrough planned inside the build was not held (the candidate asked the agent
   to continue without stopping). It should be completed before the interview.
 
