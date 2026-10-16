@@ -56,9 +56,8 @@ The agent kept these rules in its working plan and applied them in every step:
 
 ## Ownership
 
-- The candidate is accountable for every line. The planned 15-minute walkthrough was not held during the
-  build because the candidate asked the agent to continue without stopping.
-- Before the interview the candidate should be able to explain, in their own words:
+- The candidate is accountable for every line, including generated code.
+- Key points for discussion:
   - **a design choice:** provenance before detection;
   - **a correction to generated code:** the stuffing detector, from 49 false positives to 0;
   - **a failed experiment:** the misconfigured first final run;

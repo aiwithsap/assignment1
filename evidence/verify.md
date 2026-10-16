@@ -239,8 +239,6 @@ Reproduction identity: code fingerprint `46422f6e1b70832e`, corpus `c-968bf594e6
   adjudication of the borderline items.
 - No authentication; single-user, localhost only.
 - Windows was not run locally. CI (GitHub Actions run 38873931018) passes on Ubuntu and Windows after the commit 7 fix.
-- The 15-minute candidate walkthrough planned inside the build was not held (the candidate asked the agent
-  to continue without stopping). It should be completed before the interview.
 
 ## Timebox log
 

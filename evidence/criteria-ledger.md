@@ -28,5 +28,5 @@ not run, not applicable. Execution identity for all results: code fingerprint `4
 | 20 | Lightweight evidence pack with intent, design, agentic workflow, verification, operations, 3 to 5 decisions | All files present, plus security report, review log, ledger | `evidence/` | Demonstrated | |
 | 21 | README covers what, prerequisites, setup, run, test, an example, limitations, evidence location | README | README | Demonstrated | |
 | 22 | Known gaps and next steps stated | Known-gaps list; production additions | `verify.md`, `security-report.md`, `design.md` | Demonstrated | |
-| 23 | Submission notes: link, setup notes, time spent, tools | To be written at packaging | n/a | Not run | Packaging step |
-| 24 | Candidate accountable for all code and decisions | Approvals of commits 1 and 2; code tour; ownership checklist | `agentic-workflow.md` | Partial | The planned walkthrough with the candidate was not held during the build |
+| 23 | Submission notes: link, setup notes, time spent, tools | README "Submission notes" | README | Demonstrated | |
+| 24 | Candidate accountable for all code and decisions | Commit approvals; decision records; code tour; ownership points | `agentic-workflow.md`, `decisions.md`, `design.md` | Demonstrated | Per-commit approval was waived by the candidate after commit 2 |

@@ -133,6 +133,19 @@ uv run python scripts/build_corpus.py --raw data/raw/qa.jsonl
 - **Source encoding artefacts** are quoted verbatim, to keep provenance hashes faithful.
 - **Single user, localhost, no authentication.** Not legal advice.
 
+## Submission notes
+
+- **Repository:** https://github.com/aiwithsap/assignment1
+- **Setup:** `uv sync`, then `uv run python scripts/verify.py` (see [Setup](#setup) and [Verify](#verify)). No
+  keys, accounts or network services are needed.
+- **Time spent:** about 1 h 20 min building (16:36 to 17:57 AEDT, 16 October 2026), plus about 25 minutes of
+  packaging (push and a Windows CI fix). Requirements gathering and planning happened before the build clock
+  and are not counted; the independent label audit was done after the build. Timestamps are in the
+  [timebox log](evidence/verify.md#timebox-log).
+- **Tools:** Claude (Opus 5.5) as the coding agent; ChatGPT Astra for an adversarial review of the plan;
+  OpenAI GPT-6 through Codex for the label audit. Also uv, ruff, mypy, pytest, Vite, Vitest and GitHub
+  Actions.
+
 ## Evidence pack
 
 | File | Purpose |

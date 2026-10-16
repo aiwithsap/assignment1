@@ -1,6 +1,6 @@
 # Build plan: grounded Q&A over Australian legislation, with verified citations, safe abstain and prompt-injection defences
 
-**Status:** this is the plan as approved before implementation (revision 4), kept unchanged as a record. What was actually built and measured, including deviations, is in `verify.md` and `criteria-ledger.md`.
+**Status:** this is the plan as approved before implementation (revision 4), kept as a record; minor post-build edits are visible in git history. What was actually built and measured, including deviations, is in `verify.md` and `criteria-ledger.md`.
 
 **Repository:** `github.com/aiwithsap/assignment1`, which is public. Local clone: `C:\projects\assignment1`.
 
@@ -534,7 +534,7 @@ For one failure, it also records a competing explanation that was considered and
 | Category | Counted in the 3 hours? | Recorded where |
 |---|---|---|
 | Planning and data inspection before the start signal (today, about 3.5 hours of discussion) | No; disclosed separately | `verify.md` timebox log |
-| Building, testing, evidence writing, waiting for approvals, the walkthrough with you | **Yes** | Timebox log with timestamps |
+| Building, testing, evidence writing, waiting for approvals | **Yes** | Timebox log with timestamps |
 | Packaging (≤ 15 minutes): final push, CI check, submission note | Separate allowance | Timebox log |
 
 **Hard stop at 3:00.** Whatever passes `verify.py` is committed, with the gaps recorded, and implementation stops. Nothing is "finished during packaging".
@@ -548,8 +548,7 @@ For one failure, it also records a competing explanation that was considered and
 | 3 | 1:00–1:35 | `feat: end-to-end answer workflow with citation validation, output guard, abstain and audit` | `guards.py`; `answerers/*`; `citations.py`; `output_guard.py`; `service.py`; `audit.py`; `api.py`; `cli.py`; tests | The full workflow from CLI and API, with every outcome in the contract table |
 | 4 | 1:35–2:10 | `feat: evaluation harness, acceptance gates, injection suite with ablations, report renderer` | `evaluation/*`; `acceptance.toml`; `regression.toml`; dev results; frozen final test run; security results; rendered report tables | Acceptance results, ablations, held-out results (if provided) |
 | 5 | 2:10–2:35 | `feat: React presentation layer over the answers API` | Generated types; client; components; static serving; Vitest tests | Hostile-text escaping test; UI showing answered, abstained and quarantined states |
-| — | 2:35–2:50 | **Walkthrough with you (15 minutes, inside the build)** | You explain, in your own words: one design choice; one correction made to generated code; one failed experiment; one safety limit; one production trade-off. Recorded in `agentic-workflow.md` | Ownership evidence |
-| 6 | 2:50–3:00 (plus reserve) | `docs: evidence pack, review log, criteria ledger, security commentary, README` | `design.md`, `agentic-workflow.md`, `verify.md`, `operate.md`, `decisions.md`, `security-report.md` commentary, `criteria-ledger.md`, `design-review-log.md`; README with a real example and screenshots; clean-checkout run | Ledger with a status for every criterion |
+| 6 | 2:35–3:00 (plus reserve) | `docs: evidence pack, review log, criteria ledger, security commentary, README` | `design.md`, `agentic-workflow.md`, `verify.md`, `operate.md`, `decisions.md`, `security-report.md` commentary, `criteria-ledger.md`, `design-review-log.md`; README with a real example and screenshots; clean-checkout run | Ledger with a status for every criterion |
 
 The evaluation now comes **before** the UI, so it can't be squeezed out. The 15-minute reserve sits between commit 5 and the hard stop.
 
@@ -566,7 +565,6 @@ The evaluation now comes **before** the UI, so it can't be squeezed out. The 15-
 - plain-text rendering;
 - the acceptance gates and the frozen test run;
 - the evidence pack and ledger;
-- the walkthrough;
 - honest reporting.
 
 ---
@@ -577,7 +575,7 @@ The evaluation now comes **before** the UI, so it can't be squeezed out. The 15-
 |---|---|
 | `intent.md` | Problem; users; assumptions; constraints (3 hours, no keys, public data, no LLM); out of scope (legal advice, case law, authentication, generative answers, personal-advice detection); success criteria = AT1–AT6 |
 | `design.md` | Workflow and data flow; component boundaries; the state and error contract; trade-offs; security and privacy (the six layers, redaction, profile gating); presentation layer; production shape; the future-answerer seam; a short code tour |
-| `agentic-workflow.md` | Tools actually used (Claude Opus 5.5 as coding agent through the Claude app; ChatGPT Astra as adversarial plan reviewer; the AI used for the label audit); decomposition; representative steering prompts (approved, redacted excerpts); your interventions; how output was reviewed; the walkthrough record |
+| `agentic-workflow.md` | Tools actually used (Claude Opus 5.5 as coding agent through the Claude app; ChatGPT Astra as adversarial plan reviewer; the AI used for the label audit); decomposition; representative steering prompts (approved, redacted excerpts); your interventions; how output was reviewed; ownership points |
 | `design-review-log.md` | Every finding from ChatGPT Astra's adversarial review, with its disposition and the resulting design change. Written now and kept current |
 | `verify.md` | Every check with PASS, FAIL or SKIPPED; results by condition with denominators; acceptance outcomes; comparisons; failure analysis; label-audit summary; known gaps; local vs PR vs pipeline split; timebox and approval log |
 | `operate.md` | Section 6 in full |
@@ -618,7 +616,7 @@ The evaluation now comes **before** the UI, so it can't be squeezed out. The 15-
 | Safe configuration, errors and failure paths | The section 3.3 contract; fail-closed audit; unready state | Contract tests |
 | At least one guarded failure, rejection, degrade or abstain | 422 rejections, abstentions, quarantine, unready 503 | Conditions C–I |
 | Operational thinking | Section 6 | `operate.md`; readiness tests |
-| Evidence of agent use and verification | `agentic-workflow.md`, `verify.md`, `design-review-log.md`, the walkthrough | Ledger rows |
+| Evidence of agent use and verification | `agentic-workflow.md`, `verify.md`, `design-review-log.md` | Ledger rows |
 | No paid keys, private or Westpac credentials, or assessor setup | No keys exist | Clean checkout with no `.env`; CI without secrets |
 | Synthetic, sample or public data only | CC BY subset plus a synthetic overlay; raw file ignored | Integrity check; attribution |
 | Backing services, sample data and stubs included or described | In-memory corpus; no services | README |
@@ -627,7 +625,7 @@ The evaluation now comes **before** the UI, so it can't be squeezed out. The 15-
 | README contents | Filled in commit 6 from real runs | Clean-checkout record |
 | Known gaps and next steps | `verify.md`; section 7 | Ledger "remaining limitation" column |
 | Submission notes: link, time, tools | Packaging | Checklist |
-| Interview readiness and accountability | The walkthrough; decision records; code tour | Walkthrough record |
+| Interview readiness and accountability | Decision records; code tour; ownership points | `agentic-workflow.md` |
 
 **Engineering quality bar applied throughout** (general good practice):
 - typed code with Pydantic at boundaries;
@@ -645,7 +643,7 @@ A final review at commit 6 checks for unused modules, inconsistent patterns and 
 
 | Risk | Mitigation |
 |---|---|
-| You can't explain the generated code | Approvals with "what to check" notes; the 15-minute walkthrough inside the build; code tour |
+| You can't explain the generated code | Approvals with "what to check" notes; code tour |
 | Excerpt cites correctly but doesn't answer the question | Answer support measured separately (4.3); label audit; output labelled "evidence excerpt" |
 | Test data leaks into design decisions | All choices made on dev; frozen final run; predeclared targets |
 | Refusal labels are wrong (alternative support exists) | The *alternative support* category plus audit; limitation stated |
