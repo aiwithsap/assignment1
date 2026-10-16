@@ -35,6 +35,7 @@ EXIT_CODE: dict[Outcome, int] = {
 class RejectionCode(StrEnum):
     """Why an input was refused before any retrieval took place."""
 
+    INVALID_REQUEST = "invalid_request"
     EMPTY = "empty"
     TOO_LONG = "too_long"
     PII_DETECTED = "pii_detected"

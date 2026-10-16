@@ -115,7 +115,7 @@ _EVENT_ATTR = re.compile(r"\bon[a-z]+\s*=", re.IGNORECASE)
 _SCHEME = re.compile(r"\b(?:javascript|vbscript|data):", re.IGNORECASE)
 _MD_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _MD_LINK = re.compile(r"\[[^\]]+\]\([^)]+\)")
-_URL = re.compile(r"\bhttps?://([^/\s?#)]+)", re.IGNORECASE)
+URL_RE = re.compile(r"\bhttps?://([^/\s?#)]+)", re.IGNORECASE)
 
 
 def _host_allowed(host: str) -> bool:
@@ -139,7 +139,7 @@ def detect_markup(text: str) -> list[Finding]:
                     DetectorId.MKP, Severity.HIGH, match.start(), match.end(), match.group(), rule
                 )
             )
-    for match in _URL.finditer(text):
+    for match in URL_RE.finditer(text):
         if not _host_allowed(match.group(1)):
             findings.append(
                 Finding(
@@ -242,8 +242,8 @@ _SENSITIVE = (
 _SOLICITATION = re.compile(
     rf"{_REQUEST}[^.;]{{0,60}}?{_SENSITIVE}|{_SENSITIVE}[^.;]{{0,40}}?{_REQUEST}", re.I
 )
-_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
-_PHONE = re.compile(
+EMAIL_RE = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
+PHONE_RE = re.compile(
     r"(?<!\d)(?:(?:\+?61[\s-]?|0)[2-478](?:[\s-]?\d){8}|1[389]00(?:[\s-]?\d){6}|13(?:[\s-]?\d){4})(?!\d)"
 )
 
@@ -253,7 +253,7 @@ def detect_solicitation(text: str) -> list[Finding]:
     match = _SOLICITATION.search(scan)
     if not match:
         return []
-    if not (_EMAIL.search(scan) or _PHONE.search(scan) or _URL.search(scan)):
+    if not (EMAIL_RE.search(scan) or PHONE_RE.search(scan) or URL_RE.search(scan)):
         return []
     return [
         Finding(

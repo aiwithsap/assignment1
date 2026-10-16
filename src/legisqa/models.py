@@ -5,7 +5,7 @@ an answer always carries citations, and an abstention never carries an answer.
 """
 
 from enum import StrEnum
-from typing import Annotated, Literal, Self
+from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
@@ -122,7 +122,7 @@ class AskRequest(_Frozen):
 
 class AnswerResponse(_Frozen):
     request_id: str = Field(min_length=1)
-    outcome: Literal[Outcome.ANSWERED, Outcome.ABSTAINED]
+    outcome: Outcome
     corpus_version: str = Field(min_length=1)
     result: GroundedAnswer
     retrieved: tuple[Hit, ...] = ()
@@ -144,12 +144,14 @@ class ErrorEnvelope(_Frozen):
     """Body for every non-answer outcome (HTTP 422, 503 and 500)."""
 
     request_id: str = Field(min_length=1)
-    outcome: Literal[Outcome.REJECTED, Outcome.UNAVAILABLE, Outcome.INTERNAL_ERROR]
+    outcome: Outcome
     code: str | None = None
     message: str
 
     @model_validator(mode="after")
     def _code_matches_outcome(self) -> Self:
+        if self.outcome in (Outcome.ANSWERED, Outcome.ABSTAINED):
+            raise ValueError("an error envelope cannot carry an answer outcome")
         allowed: dict[Outcome, set[str]] = {
             Outcome.REJECTED: {c.value for c in RejectionCode},
             Outcome.UNAVAILABLE: {c.value for c in UnavailableCode},

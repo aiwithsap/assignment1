@@ -6,6 +6,7 @@ user questions or responses never store text, only offsets and a fingerprint.
 """
 
 import json
+import logging
 import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -18,6 +19,8 @@ from legisqa.logging_setup import fingerprint
 from legisqa.security.detectors import Finding
 
 MAX_MATCHED_CHARS = 80
+
+log = logging.getLogger("legisqa.security")
 
 
 class EventSource(StrEnum):
@@ -82,15 +85,18 @@ class EventStore:
         self._path = path
         self._events: list[SecurityEvent] = []
         self._lock = Lock()
-        if path is not None:
-            path.parent.mkdir(parents=True, exist_ok=True)
 
     def add(self, event: SecurityEvent) -> SecurityEvent:
         with self._lock:
             self._events.append(event)
             if self._path is not None:
-                with self._path.open("a", encoding="utf-8") as handle:
-                    handle.write(json.dumps(event.model_dump(mode="json")) + "\n")
+                # The JSONL mirror is best-effort; the answer audit log is the fail-closed control.
+                try:
+                    self._path.parent.mkdir(parents=True, exist_ok=True)
+                    with self._path.open("a", encoding="utf-8") as handle:
+                        handle.write(json.dumps(event.model_dump(mode="json")) + "\n")
+                except OSError:
+                    log.error("security event file not writable; event kept in memory")
         return event
 
     def all(self) -> tuple[SecurityEvent, ...]:

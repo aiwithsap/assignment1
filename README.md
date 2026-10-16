@@ -26,12 +26,14 @@ uv sync
 ## Run
 
 ```bash
-uv run legisqa --version
-uv run legisqa show-config
-uv run legisqa verify-corpus   # manifest hashes, overlay isolation, quarantine counts
+uv run legisqa ask "What are the assay limits for active ingredients in tablets and capsules?"
+uv run legisqa serve                 # API + UI on http://127.0.0.1:8000 (OpenAPI docs at /docs)
+uv run legisqa serve --profile demo  # also loads the attack overlay, to watch interceptions
+uv run legisqa verify-corpus         # manifest hashes, overlay isolation, quarantine counts
 ```
 
-The `ask`, `serve` and `eval` commands arrive with their features.
+`ask` prints the JSON response. Exit codes follow the outcome contract: 0 answered or abstained,
+2 rejected input, 3 service unavailable, 1 internal error.
 
 ## Data
 

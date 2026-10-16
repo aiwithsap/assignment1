@@ -4,11 +4,20 @@ import json
 from typing import Annotated
 
 import typer
+import uvicorn
 
 from legisqa import __version__
-from legisqa.config import Settings
+from legisqa.api import create_app
+from legisqa.config import Profile, Settings
 from legisqa.corpus import load_corpus
-from legisqa.errors import EXIT_CODE, Outcome, StartupError
+from legisqa.errors import EXIT_CODE, Outcome, RejectionError, StartupError, UnavailableError
+from legisqa.logging_setup import configure_logging
+from legisqa.models import ErrorEnvelope, Jurisdiction
+from legisqa.service import AnswerService
+
+ProfileOption = Annotated[
+    Profile | None, typer.Option("--profile", help="Override LEGISQA_PROFILE.")
+]
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, help=__doc__)
 
@@ -68,3 +77,39 @@ def verify_corpus() -> None:
     typer.echo(json.dumps(summary, indent=2))
     if problems:
         raise typer.Exit(EXIT_CODE[Outcome.UNAVAILABLE])
+
+
+def _settings(profile: Profile | None) -> Settings:
+    return Settings(profile=profile) if profile else Settings()
+
+
+@app.command()
+def ask(
+    question: Annotated[str, typer.Argument(help="Question about Australian legislation.")],
+    jurisdiction: Annotated[
+        Jurisdiction | None, typer.Option(help="Restrict the search to one jurisdiction.")
+    ] = None,
+    profile: ProfileOption = None,
+) -> None:
+    """Answer one question. Prints the JSON response; exit code follows the outcome contract."""
+    settings = _settings(profile)
+    configure_logging("WARNING")
+    service = AnswerService(settings)
+    try:
+        response = service.ask(question, jurisdiction)
+    except (RejectionError, UnavailableError) as exc:
+        outcome = Outcome.REJECTED if isinstance(exc, RejectionError) else Outcome.UNAVAILABLE
+        envelope = ErrorEnvelope(
+            request_id="cli", outcome=outcome, code=exc.code.value, message=exc.message
+        )
+        typer.echo(envelope.model_dump_json(indent=2))
+        raise typer.Exit(EXIT_CODE[outcome]) from exc
+    typer.echo(response.model_dump_json(indent=2))
+
+
+@app.command()
+def serve(profile: ProfileOption = None) -> None:
+    """Serve the API and the built UI on the configured host and port."""
+    settings = _settings(profile)
+    configure_logging(settings.log_level)
+    uvicorn.run(create_app(settings), host=settings.host, port=settings.port, log_config=None)

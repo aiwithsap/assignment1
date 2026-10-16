@@ -120,6 +120,10 @@ class Retriever:
     def __len__(self) -> int:
         return len(self._chunks)
 
+    def idf(self, term: str) -> float:
+        """Inverse document frequency; unseen terms get the maximum."""
+        return float(self._bm25.idf.get(term, self._max_idf))
+
     def _term_score(self, index: int, term: str) -> float:
         tf = self._bm25.doc_freqs[index].get(term, 0)
         if tf == 0:
